@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Weather Chat</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>Weather Chat</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-10 form-inline">
+                <form >
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="city" placeholder="Enter City">
+                        <button type="button" class="btn btn-primary get-temp">Get Temp</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 city-results">
+
+            </div>
+        </div>
+    </div>
+
+    <script id="city-template" type="text/x-handlebars-template">
+        {{#each city}}
+            <div data-id="{{id}}">
+                <h2 class="name">{{name}}<i class="fa fa-trash-o remove-post" aria-hidden="true"></i></h2>
+                <h4>{{tempC}}&#8451; / {{tempF}}&#8457; <span>{{time}}</span></h4>
+                <p>comments</p>
+                <input class="input-comment" Comments about the weather in {{name}}">
+                <button type="button" class="btn btn-primary post-comment">Comment</button>
+                <ul class="comments-container" data-id="{{id}}"></ul>
+            </div>
+        {{/each}}
+    </script>
+
+    <script id="comment-template" type="text/x-handlebars-template">
+        {{#each comments}}
+            <li>{{comment}}<i class="fa fa-trash-o" aria-hidden="true"></i></li>
+        {{/each}}
+    </script>
+
+    <script type="text/javascript" src="jquery/dist/jquery.js"></script>
+    <script type="text/javascript" src="bootstrap/dist/js/bootstrap.js"></script>
+    <script type="text/javascript" src="handlebars/dist/handlebars.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+</body>
+</html>
