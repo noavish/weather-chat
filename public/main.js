@@ -12,8 +12,21 @@ var fetch = function (city) {
     })
 }
 
-var searchedCities = [];
-var runningID = 0;
+
+var SEARCHS_ID = 'cities';
+var RUNNING_ID = 'cities_id';
+
+var saveToLocalStorage = function () {
+    localStorage.setItem(SEARCHS_ID, JSON.stringify(searchedCities));
+    localStorage.setItem(RUNNING_ID, runningID);
+}
+
+var getFromLocalStorage = function () {
+    return JSON.parse(localStorage.getItem(SEARCHS_ID) || '[]');
+}
+
+var searchedCities = getFromLocalStorage();
+var runningID = localStorage.getItem(RUNNING_ID) || 0;
 
 function timeStamp () {
     var now = new Date();
@@ -29,6 +42,7 @@ function createCityTemp(data) {
     var cityObject = {id: runningID, "name": data.name, "tempC": data.main.temp, "tempF": tempF, "time": time};
     searchedCities.push(cityObject);
     runningID++;
+    saveToLocalStorage();
     renderSearches();
 }
 
@@ -59,6 +73,7 @@ $('.city-results').on('click', '.post-comment', function () {
        cityToCommentOn.comments = [];
    }
     cityToCommentOn.comments.push({comment: comment});
+    saveToLocalStorage();
     renderSearches();
 });
 
@@ -70,8 +85,18 @@ function _findCityByName(name) {
     }
 }
 
-// $('city-results').on('click', '.remove-post', function () {
-//    $(this).
-// });
-//
-// )
+$('.city-results').on('click', '.remove-post', function () {
+    searchedCities.splice($(this).parents('div').index(), 1);
+    saveToLocalStorage();
+    renderSearches();
+});
+
+$('.city-results').on('click', '.remove-comment', function () {
+    var idToRemove = $(this).parents('li').index();
+    var cityID = $(this).parents('div').index();
+    searchedCities[cityID].comments.splice(idToRemove, 1);
+    saveToLocalStorage();
+    renderSearches();
+});
+
+renderSearches();
