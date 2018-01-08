@@ -62,7 +62,7 @@ function renderSearches() {
 }
 
 $('.get-temp').click(function () {
-    var city = $(this).siblings('#city').val();
+    var city = $(this).parents('.submit-btn-div').siblings('#city').val();
     fetch(city);
 });
 
