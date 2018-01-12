@@ -17,8 +17,9 @@
                 <h1>Weather Chat</h1>
             </div>
         </div>
+        <br>
         <div class="row">
-            <div class="col-10">
+            <div class="col-12">
                 <form >
                     <div class="input-group">
                         <input type="text" class="form-control" id="city" placeholder="Enter City">
@@ -31,6 +32,14 @@
         </div>
         <hr>
         <div class="row">
+            <div class="col-12 sort-div">
+                <h4>Sort results by: </h4>
+                <button type="button" class="btn btn-danger sort-by-city">City</button>
+                <button type="button" class="btn btn-danger sort-by-temp">Temperature</button>
+                <button type="button" class="btn btn-danger sort-by-date">Date</button>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-12 city-results">
 
             </div>
@@ -39,12 +48,16 @@
 
     <script id="city-template" type="text/x-handlebars-template">
         {{#each city}}
-            <div data-id="{{id}}">
+            <div data-id="{{id}}" class="city-result">
                 <h2 class="name">{{name}}<i class="fa fa-trash-o remove-post" aria-hidden="true"></i></h2>
-                <h4>{{tempC}}&#8451; / {{tempF}}&#8457; <span>{{time}}</span></h4>
+                <h4 class="temps">{{tempC}}&#8451; / {{tempF}}&#8457; <span class="time">{{timeString}}</span></h4>
                 <p>comments</p>
-                <input class="input-comment" Comments about the weather in {{name}}">
-                <button type="button" class="btn btn-primary post-comment">Comment</button>
+                <form class="input-group">
+                    <input type="text" class="input-comment form-control" Comments about the weather in {{name}}">
+                    <div class="input-group-btn submit-comment-div">
+                        <button type="button" class="btn btn-success post-comment">Comment</button>
+                    </div>
+                </form>
                 <ul class="comments-container" data-id="{{id}}"></ul>
             </div>
         {{/each}}
@@ -52,7 +65,7 @@
 
     <script id="comment-template" type="text/x-handlebars-template">
         {{#each comments}}
-            <li>{{comment}}<i class="fa fa-trash-o remove-comment" aria-hidden="true"></i></li>
+            <li><i class="fa fa-trash-o remove-comment" aria-hidden="true"></i> {{comment}}</li>
         {{/each}}
     </script>
 

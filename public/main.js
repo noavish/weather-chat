@@ -1,3 +1,4 @@
+// Ajax request to the weather API
 var fetch = function (city) {
     $.ajax({
         method: "GET",
@@ -12,40 +13,65 @@ var fetch = function (city) {
     })
 }
 
-
-var SEARCHS_ID = 'cities';
+// Setting up local storage
+var SEARCHES_ID = 'cities';
 var RUNNING_ID = 'cities_id';
+var sortingHelper = 1;
 
 var saveToLocalStorage = function () {
-    localStorage.setItem(SEARCHS_ID, JSON.stringify(searchedCities));
+    localStorage.setItem(SEARCHES_ID, JSON.stringify(searchedCities));
     localStorage.setItem(RUNNING_ID, runningID);
-}
+};
 
 var getFromLocalStorage = function () {
-    return JSON.parse(localStorage.getItem(SEARCHS_ID) || '[]');
-}
+    return JSON.parse(localStorage.getItem(SEARCHES_ID) || '[]');
+};
 
+// Rebutting global variables
 var searchedCities = getFromLocalStorage();
 var runningID = localStorage.getItem(RUNNING_ID) || 0;
 
-function timeStamp () {
-    var now = new Date();
+// Creating time string
+function timeStamp (now) {
     var hours = now.getHours();
     var minutes = now.getMinutes();
     var date = now.toLocaleDateString();
     return (`at ${hours}:${minutes} on ${date}`);
 }
 
+// Creating new objects and pushing to searchedCities array
 function createCityTemp(data) {
     var tempF = data.main.temp * 1.8 +32;
-    var time = timeStamp ();
-    var cityObject = {id: runningID, "name": data.name, "tempC": data.main.temp, "tempF": tempF, "time": time};
+    var now = new Date();
+    var timeString = timeStamp(now);
+    var cityObject = {id: runningID, "name": data.name, "tempC": data.main.temp.toFixed(2), "tempF": tempF.toFixed(2), "timeString": timeString, "timestamp": now.getTime()};
     searchedCities.push(cityObject);
     runningID++;
     saveToLocalStorage();
     renderSearches();
 }
 
+// find city by ID
+function _findCityByID(id) {
+    for (var i=0; i<searchedCities.length; i++) {
+        if (id == searchedCities[i].id) {
+            return searchedCities[i];
+        }
+    }
+}
+
+// add comments to searchedCities
+function addCommentToArray(clickedElement, comment) {
+    var cityToCommentOn = _findCityByID($(clickedElement).parents('.city-result').data().id);
+    if (!('comments' in cityToCommentOn)) {
+        cityToCommentOn.comments = [];
+    }
+    cityToCommentOn.comments.push({comment: comment});
+    saveToLocalStorage();
+    renderSearches();
+}
+
+// render view
 function renderSearches() {
     var $cityResults = $('.city-results');
     $cityResults.empty();
@@ -61,29 +87,68 @@ function renderSearches() {
     }
 }
 
+// Sorting by date/temp
+function sortBy(sortingCritiria) {
+    searchedCities.sort(function(a, b){return (a[sortingCritiria] - b[sortingCritiria]) * sortingHelper});
+    sortingHelper *= -1;
+}
+
+// sort by name
+function sortByName() {
+    searchedCities.sort(function(a, b){
+        if (a.name < b.name) {
+            return -1 * sortingHelper;
+        }
+        if (a.name > b.name) {
+            return sortingHelper;
+        }
+        return 0;
+    });
+    sortingHelper *= -1;
+}
+
 $('.get-temp').click(function () {
     var city = $(this).parents('.submit-btn-div').siblings('#city').val();
-    fetch(city);
+    if (!isCityInArray(city)) {
+        fetch(city);
+    }
+    $(this).parents('.submit-btn-div').siblings('#city').val('');
 });
 
-$('.city-results').on('click', '.post-comment', function () {
-   var comment = $(this).siblings('.input-comment').val();
-   var cityToCommentOn = _findCityByName($(this).siblings('.name').text());
-   if (!('comments' in cityToCommentOn)) {
-       cityToCommentOn.comments = [];
-   }
-    cityToCommentOn.comments.push({comment: comment});
-    saveToLocalStorage();
-    renderSearches();
+$('#city').keypress(function(event) {
+    if (event.keyCode == 13 || event.which == 13) {
+        var city = $(this).val();
+        if (!isCityInArray(city)) {
+            fetch(city);
+        }
+        event.preventDefault();
+        $(this).val('');
+    }
 });
 
-function _findCityByName(name) {
+function isCityInArray(cityName) {
     for (var i=0; i<searchedCities.length; i++) {
-        if (name === searchedCities[i].name) {
-            return searchedCities[i];
+        if (cityName.toLowerCase() === searchedCities[i].name.toLowerCase()) {
+            alert(`A search was already made for ${cityName}`);
+            return true;
         }
     }
+    return false;
 }
+
+$('.city-results').on('click', '.post-comment', function () {
+   var comment = $(this).parents('div').siblings('.input-comment').val();
+    addCommentToArray(this, comment);
+});
+
+$('.city-results').on('keypress', '.input-comment', function(event) {
+    if (event.keyCode == 13 || event.which == 13) {
+        var comment = $(this).val();
+        addCommentToArray(this, comment);
+        event.preventDefault();
+        $(this).val('');
+    }
+});
 
 $('.city-results').on('click', '.remove-post', function () {
     searchedCities.splice($(this).parents('div').index(), 1);
@@ -96,6 +161,22 @@ $('.city-results').on('click', '.remove-comment', function () {
     var cityID = $(this).parents('div').index();
     searchedCities[cityID].comments.splice(idToRemove, 1);
     saveToLocalStorage();
+    renderSearches();
+});
+
+
+$('.sort-by-city').click(function () {
+    sortByName();
+    renderSearches();
+});
+
+$('.sort-by-temp').click(function () {
+    sortBy("tempC");
+    renderSearches();
+});
+
+$('.sort-by-date').click(function () {
+    sortBy("timestamp");
     renderSearches();
 });
 
